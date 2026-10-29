@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartOdds — Futebol com dados</title>
+
+<style>
+:root {
+  --bg: #07121b;
+  --panel: #0c1c28;
+  --panel2: #102735;
+  --line: #203c4a;
+  --green: #18e6a1;
+  --muted: #9cb0bd;
+  --white: #f4f8fb;
+  --amber: #ffd166;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--white);
+  font: 15px/1.5 Arial, sans-serif;
+}
+
+button, input, select { font: inherit; }
+button { cursor: pointer; }
+
+.wrap {
+  max-width: 1200px;
+  margin: auto;
+  padding: 20px;
+}
+
+.bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.logo {
+  font-weight: 900;
+  font-size: 25px;
+}
+
+.logo span { color: var(--green); }
+
+.label {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 1.2px;
+}
+
+.nav {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn, .nav button {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: #d6e4ec;
+  border-radius: 9px;
+  padding: 10px 14px;
+}
+
+.btn.primary {
+  background: var(--green);
+  color: #062016;
+  border-color: var(--green);
+  font-weight: bold;
+}
+
+.hero {
+  padding: 30px 0;
+}
+
+.hero h1 {
+  font-size: clamp(28px, 5vw, 45px);
+  line-height: 1.1;
+  margin: 10px 0;
+}
+
+.hero p { color: var(--muted); }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  padding: 18px;
+  margin-bottom: 16px;
+}
+
+.card h2, .card h3 { margin-top: 0; }
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: end;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+  min-width: 150px;
+}
+
+label {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+input, select {
+  width: 100%;
+  padding: 11px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  color: var(--white);
+  border-radius: 8px;
+}
+
+.muted { color: var(--muted); }
+.green { color: var(--green); }
+.amber { color: var(--amber); }
+
+.match {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  padding: 16px;
+}
+
+.teams {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 12px 0;
+}
+
+.match small { color: var(--muted); }
+
+.match-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+.status {
+  padding: 10px;
+  border-radius: 8px;
+  background: var(--panel2);
+  color: var(--muted);
+  margin: 12px 0;
+}
+
+.stat {
+  padding: 12px;
+  background: var(--panel2);
+  border-radius: 10px;
+}
+
+.stat strong {
+  display: block;
+  font-size: 22px;
+  color: var(--green);
+}
+
+.hidden { display: none; }
+
+footer {
+  border-top: 1px solid var(--line);
+  margin-top: 30px;
+  padding: 20px 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+@media(max-width:600px) {
+  .wrap { padding: 14px; }
+}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+<header class="bar">
+  <div>
+    <div class="logo">Smart<span>Odds</span></div>
+    <div class="label">FUTEBOL ANALISADO COM DADOS</div>
+  </div>
+
+  <div class="nav">
+    <button onclick="showSection('jogos')">Jogos</button>
+    <button onclick="showSection('calculadora')">Calculadora</button>
+    <button onclick="showSection('sobre')">Sobre</button>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="label green">ANÁLISE ESPORTIVA</div>
+  <h1>Decida com dados.<br><span class="green">Não com palpites.</span></h1>
+  <p>
+    Consulte partidas disponíveis, examine informações e calcule
+    probabilidades implícitas das odds.
+  </p>
+</section>
+
+<section id="jogos">
+  <div class="card">
+    <h2>Buscar partidas</h2>
+
+    <div class="controls">
+      <div class="field">
+        <label for="data">Data dos jogos</label>
+        <input type="date" id="data">
+      </div>
+
+      <div class="field">
+        <label for="liga">Competição</label>
+        <select id="liga">
+          <option value="">Todas as competições</option>
+        </select>
+      </div>
+
+      <button class="btn primary" onclick="buscarJogos()">
+        Buscar jogos
+      </button>
+    </div>
+
+    <div id="status" class="status">
+      Escolha uma data e clique em “Buscar jogos”.
+    </div>
+  </div>
+
+  <div id="lista" class="grid"></div>
+</section>
+
+<section id="analise" class="hidden">
+  <div class="card">
+    <button class="btn" onclick="showSection('jogos')">
+      ← Voltar aos jogos
+    </button>
+
+    <h2 id="tituloAnalise">Análise da partida</h2>
+    <div id="detalhes"></div>
+  </div>
+</section>
+
+<section id="calculadora" class="hidden">
+  <div class="card">
+    <h2>Calculadora de odds</h2>
+    <p class="muted">
+      Calcule a probabilidade implícita de uma odd decimal.
+    </p>
+
+    <div class="controls">
+      <div class="field">
+        <label for="odd">Odd decimal</label>
+        <input id="odd" type="number" min="1.01"
+          step="0.01" placeholder="Ex.: 2.00">
+      </div>
+
+      <button class="btn primary" onclick="calcularOdd()">
+        Calcular
+      </button>
+    </div>
+
+    <div id="resultadoOdd" class="status">
+      O resultado aparecerá aqui.
+    </div>
+  </div>
+</section>
+
+<section id="sobre" class="hidden">
+  <div class="card">
+    <h2>Sobre o SmartOdds</h2>
+    <p>
+      O SmartOdds é um protótipo de análise esportiva para ajudar
+      a interpretar informações de futebol e probabilidades.
+    </p>
+    <p>
+      Os dados disponíveis dependem da fonte consultada.
+      Nem todas as partidas possuem estatísticas completas.
+    </p>
+    <p class="amber">
+      Nenhuma análise garante resultados ou lucros em apostas.
+    </p>
+  </div>
+</section>
+
+<footer>
+  <strong>SmartOdds</strong> — ferramenta informativa de análise
+  esportiva. Aposte com responsabilidade. Proibido para menores de 18 anos.
+</footer>
+
+</div>
+
+<script>
+const API = "https://www.thesportsdb.com/api/v1/json/3";
+
+const dataInput = document.getElementById("data");
+const statusEl = document.getElementById("status");
+const listaEl = document.getElementById("lista");
+
+dataInput.value = new Date().toLocaleDateString("en-CA");
+
+function showSection(id) {
+  ["jogos", "analise", "calculadora", "sobre"].forEach(section => {
+    document.getElementById(section).classList.add("hidden");
+  });
+
+  document.getElementById(id).classList.remove("hidden");
+}
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;"
+  })[char]);
+}
+
+async function buscarJogos() {
+  const data = dataInput.value;
+
+  if (!data) {
+    statusEl.textContent = "Selecione uma data.";
+    return;
+  }
+
+  listaEl.innerHTML = "";
+  statusEl.textContent = "Buscando partidas disponíveis...";
+
+  try {
+    const response = await fetch(
+      `${API}/eventsday.php?d=${encodeURIComponent(data)}&s=Soccer`
+    );
+
+    if (!response.ok) {
+      throw new Error("A fonte de dados não respondeu.");
+    }
+
+    const json = await response.json();
+    const eventos = json.events || [];
+
+    if (!eventos.length) {
+      statusEl.textContent =
+        "Nenhuma partida foi encontrada nessa data. Tente outra data.";
+      return;
+    }
+
+    const competicoes = [...new Set(
+      eventos.map(j => j.strLeague).filter(Boolean)
+    )].sort();
+
+    const ligaSelect = document.getElementById("liga");
+    const ligaAnterior = ligaSelect.value;
+
+    ligaSelect.innerHTML =
+      '<option value="">Todas as competições</option>' +
+      competicoes.map(liga =>
+        `<option value="${escapeHTML(liga)}">${escapeHTML(liga)}</option>`
+      ).join("");
+
+    if (competicoes.includes(ligaAnterior)) {
+      ligaSelect.value = ligaAnterior;
+    }
+
+    window.smartOddsEvents = eventos;
+
+    renderizarJogos();
+
+  } catch (error) {
+    statusEl.textContent =
+      "Não foi possível buscar os jogos. A fonte gratuita pode estar " +
+      "indisponível ou bloqueada pelo navegador. Tente novamente mais tarde.";
+    console.error(error);
+  }
+}
+
+function renderizarJogos() {
+  const eventos = window.smartOddsEvents || [];
+  const liga = document.getElementById("liga").value;
+
+  const filtrados = eventos.filter(j =>
+    !liga || j.strLeague === liga
+  );
+
+  listaEl.innerHTML = "";
+
+  if (!filtrados.length) {
+    statusEl.textContent = "Nenhum jogo encontrado para esse filtro.";
+    return;
+  }
+
+  statusEl.textContent =
+    `${filtrados.length} partida(s) encontrada(s).`;
+
+  filtrados.forEach((jogo, index) => {
+    const placar =
+      jogo.intHomeScore != null && jogo.intAwayScore != null
+      ? `${jogo.intHomeScore} × ${jogo.intAwayScore}`
+      : "VS";
+
+    const horario = jogo.strTime
+      ? jogo.strTime.substring(0, 5)
+      : "Horário indisponível";
+
+    const card = document.createElement("article");
+    card.className = "match";
+
+    card.innerHTML = `
+      <small>${escapeHTML(jogo.strLeague || "Competição não informada")}</small>
+      <div class="teams">
+        ${escapeHTML(jogo.strHomeTeam || "Time da casa")}
+        <div class="muted">${escapeHTML(placar)}</div>
+        ${escapeHTML(jogo.strAwayTeam || "Time visitante")}
+      </div>
+      <small>${escapeHTML(horario)}</small>
+      <div class="match-actions">
+        <button class="btn primary" data-index="${index}">
+          Analisar partida
+        </button>
+      </div>
+    `;
+
+    card.querySelector("button").addEventListener("click", () => {
+      abrirAnalise(filtrados[index]);
+    });
+
+    listaEl.appendChild(card);
+  });
+}
+
+document.getElementById("liga").addEventListener("change", renderizarJogos);
+
+function abrirAnalise(jogo) {
+  document.getElementById("tituloAnalise").textContent =
+    `${jogo.strHomeTeam || "Casa"} x ${jogo.strAwayTeam || "Visitante"}`;
+
+  const placar =
+    jogo.intHomeScore != null && jogo.intAwayScore != null
+    ? `${jogo.intHomeScore} × ${jogo.intAwayScore}`
+    : "Placar ainda não disponível";
+
+  document.getElementById("detalhes").innerHTML = `
+    <div class="grid">
+      <div class="stat">
+        <strong>${escapeHTML(placar)}</strong>
+        <span>Placar informado pela fonte</span>
+      </div>
+      <div class="stat">
+        <strong>${escapeHTML(jogo.strLeague || "Não informado")}</strong>
+        <span>Competição</span>
+      </div>
+      <div class="stat">
+        <strong>${escapeHTML(jogo.dateEvent || "Não informado")}</strong>
+        <span>Data da partida</span>
+      </div>
+    </div>
+
+    <div class="status">
+      Esta versão não possui dados suficientes para gerar uma previsão
+      confiável de vitória, empate, gols, escanteios ou cartões.
+      Não serão inventadas estatísticas ou probabilidades.
+    </div>
+
+    <h3>Calcular uma odd</h3>
+    <p class="muted">
+      Use a calculadora para verificar a probabilidade implícita de uma odd.
+    </p>
+    <button class="btn primary" onclick="showSection('calculadora')">
+      Abrir calculadora
+    </button>
+  `;
+
+  showSection("analise");
+}
+
+function calcularOdd() {
+  const odd = Number(document.getElementById("odd").value);
+  const resultado = document.getElementById("resultadoOdd");
+
+  if (!Number.isFinite(odd) || odd <= 1) {
+    resultado.textContent = "Digite uma odd decimal maior que 1.";
+    return;
+  }
+
+  const probabilidade = 100 / odd;
+
+  resultado.innerHTML = `
+    <strong class="green">
+      Probabilidade implícita: ${probabilidade.toFixed(2)}%
+    </strong>
+    <p>
+      Essa porcentagem é calculada a partir da odd informada.
+      Não representa uma previsão real da chance de o evento acontecer.
+    </p>
+  `;
+}
+</script>
+</body>
+</html>
